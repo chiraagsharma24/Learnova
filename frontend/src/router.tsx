@@ -1,9 +1,15 @@
-import { Route, Navigate, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
+import { Route, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
 
 import LandingPage from "@/components/landing";
-import { AuthLayout, Login, Register, ProtectedRoute } from "@/components/auth";
-import { DashboardLayout, Home } from "@/components/dashboard";
+import { PublicLayout } from "@/components/layouts/PublicLayout";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "@/components/NotFound";
+
+import { LoginPage } from "@/pages/LoginPage";
+import { RegisterPage } from "@/pages/RegisterPage";
+import { CourseCatalog } from "@/pages/CourseCatalog";
+import { LearnerDashboard } from "./pages/LearnerDashboard";
+import { CourseDetail } from "@/pages/CourseDetail";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -11,19 +17,28 @@ export const router = createBrowserRouter(
       {/* Landing page */}
       <Route path="/" element={<LandingPage />} />
 
-      {/* Auth routes */}
-      <Route path="auth/" element={<AuthLayout />}>
-        <Route index element={<Navigate to="/auth" />} />
-        <Route path="login/" element={<Login />} />
-        <Route path="register/" element={<Register />} />
+      {/* Public Routes */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/courses" element={<CourseCatalog />} />
+        <Route path="/courses/:id" element={<CourseDetail />} />
       </Route>
 
-      {/* Protected routes */}
-      <Route path="/" element={<ProtectedRoute />}>
-        <Route path="dashboard/" element={<DashboardLayout />}>
-          <Route path="home" element={<Home />} />
-        </Route>
-      </Route>
+      {/* Auth Routes */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      {/* Learner Routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["learner", "instructor", "admin"]}>
+            <PublicLayout>
+              <LearnerDashboard />
+            </PublicLayout>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Not found */}
       <Route path="*" element={<NotFound />} />
