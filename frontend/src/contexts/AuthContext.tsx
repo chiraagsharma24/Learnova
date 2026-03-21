@@ -8,10 +8,11 @@ import type { UserProfile } from "@/types/user";
 interface AuthContextType {
     user: UserProfile | null;
     loading: boolean;
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<UserProfile>;
     register: (name: string, email: string, password: string, role?: string) => Promise<void>;
     logout: () => Promise<void>;
     becomeInstructor: () => Promise<void>;
+    refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,11 +55,13 @@ export function AuthProvider({ children }: Props){
         setLoading(true);
         try {
             await loginUser(email, password);
-            await refreshProfile();
+            const profile = await fetchMe();
+            setUser(profile);
+            return profile;
         } finally {
             setLoading(false);
         }
-    }, [refreshProfile]);
+    }, []);
 
     const register = useCallback(async (
         name: string,
@@ -101,8 +104,9 @@ export function AuthProvider({ children }: Props){
         login,
         register,
         logout,
-        becomeInstructor
-    }), [user, loading, login, register, logout, becomeInstructor]);
+        becomeInstructor,
+        refreshProfile,
+    }), [user, loading, login, register, logout, becomeInstructor, refreshProfile]);
 
     return (
         <AuthContext.Provider value={value}>

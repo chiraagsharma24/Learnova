@@ -7,31 +7,22 @@ export interface Course {
   description: string;
   active: boolean;
   visibility: "everyone" | "signed-in";
-  access: "open" | "invitation";
+  access: "open" | "invitation" | "payment";
+  websiteUrl?: string;
+  courseAdminUserId?: string;
+  price?: number;
   instructorId: string;
   instructorName: string;
+  tags?: string[];
+  viewCount?: number;
   learnerCount?: number;
   reviewCount?: number;
+  /** All lessons (admin aggregate) */
+  lessonCount?: number;
+  /** Sum of video lesson durations in minutes (non-video = 0) */
+  totalDurationMinutes?: number;
   lessons?: Lesson[];
   createdAt: string;
-}
-
-export interface CourseReport {
-  totalEnrollments: number;
-  completions: number;
-  completionRate: number;
-  averageProgress: number;
-  attendees: {
-    _id: string;
-    user: {
-      name: string;
-      email: string;
-    };
-    completedLessons: number;
-    totalLessons: number;
-    completed: boolean;
-    completedAt?: string;
-  }[];
 }
 
 export interface Enrollment {

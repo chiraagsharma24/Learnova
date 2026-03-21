@@ -11,5 +11,9 @@ export interface Lesson {
   documentUrl?: string;
   imageUrl?: string;
   duration?: number;
+  description?: string;
+  responsibleUserId?: string;
+  allowDownload?: boolean;
+  attachments?: { name: string; url: string; kind: "file" | "link" }[];
   quiz?: Quiz;
 }
