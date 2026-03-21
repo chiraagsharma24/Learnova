@@ -1,0 +1,39 @@
+services:
+  # backend:
+  #   container_name: learnova-backend
+  #   build: ./backend/Dockerfile
+  #   env_file:
+  #     - ./backend/.env
+  #   ports:
+  #     - "1337:${PORT}"
+  #   environment:
+  #     - DATABASE_URL=postgresql://learnova_user:learnova_password@localhost:5432/learnova
+  #   depends_on:
+  #     - database
+  #   restart: unless-stopped
+
+  # frontend:
+  #   container_name: learnova-frontend
+  #   build: ./frontend/Dockerfile
+  #   ports:
+  #     - "5137:5137"
+  #   environment:
+  #     - VITE_API_URL=http://localhost:1337
+  #   restart: unless-stopped
+
+  db:
+    container_name: learnova-db
+    image: mongo:8.2.3
+    # restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ${MONGO_DATA_PATH}:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    ports:
+      - "27017:27017"
+
+volumes:
+  data:
