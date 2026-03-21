@@ -7,7 +7,7 @@ services:
   #   ports:
   #     - "1337:${PORT}"
   #   environment:
-  #     - DATABASE_URL=postgresql://learnova_user:learnova_password@localhost:5432/learnova
+  #     - MONGODB_URI: ${MONGODB_URI}
   #   depends_on:
   #     - database
   #   restart: unless-stopped
