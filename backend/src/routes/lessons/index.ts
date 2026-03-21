@@ -1,96 +1,144 @@
 import { Router } from "express";
+import { failure, success } from "../../config/response.js";
+import {
+	type AuthRequest,
+	requireAuth,
+	requireRole,
+} from "../../middlewares/auth.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Quiz } from "../../models/Quiz.js";
-import { requireAuth, requireRole, type AuthRequest } from "../../middlewares/auth.js";
-import { success, failure } from "../../config/response.js";
 
 const router = Router({ mergeParams: true });
 
 // GET /api/courses/:courseId/lessons - list lessons
 router.get("/", async (req, res) => {
-    try {
-        const { courseId } = req.params;
-        const { status, search } = req.query;
-        const query: any = { courseId };
-        if (status) query.status = status;
-        if (search) query.title = { $regex: search, $options: "i" };
+	try {
+		const { courseId } = req.params;
+		const { status, search } = req.query;
+		const query: any = { courseId };
+		if (status) query.status = status;
+		if (search) query.title = { $regex: search, $options: "i" };
 
-        const lessons = await Lesson.find(query).sort({ order: 1 });
-        return success(res, 200, lessons);
-    } catch (err) {
-        return failure(res, 500, `${err}`);
-    }
+		const lessons = await Lesson.find(query).sort({ order: 1 });
+		return success(res, 200, lessons);
+	} catch (err) {
+		return failure(res, 500, `${err}`);
+	}
 });
 
 // GET /api/courses/:courseId/lessons/:lessonId
 router.get("/:lessonId", async (req, res) => {
-    try {
-        const lesson = await Lesson.findOne({ _id: req.params.lessonId, courseId: req.params.courseId });
-        if (!lesson) return failure(res, 404, "Lesson not found");
+	try {
+		const lesson = await Lesson.findOne({
+			_id: req.params.lessonId,
+			courseId: req.params.courseId,
+		});
+		if (!lesson) return failure(res, 404, "Lesson not found");
 
-        if (lesson.type === "quiz") {
-            const quiz = await Quiz.findOne({ lessonId: lesson._id });
-            return success(res, 200, { ...lesson.toObject(), quiz });
-        }
-        return success(res, 200, lesson);
-    } catch (err) {
-        return failure(res, 500, `${err}`);
-    }
+		if (lesson.type === "quiz") {
+			const quiz = await Quiz.findOne({ lessonId: lesson._id });
+			return success(res, 200, { ...lesson.toObject(), quiz });
+		}
+		return success(res, 200, lesson);
+	} catch (err) {
+		return failure(res, 500, `${err}`);
+	}
 });
 
 // POST /api/courses/:courseId/lessons - create lesson
-router.post("/", requireAuth, requireRole("admin", "instructor"), async (req: AuthRequest, res) => {
-    try {
-        const { courseId } = req.params;
-        const { title, type, status, order, videoUrl, documentUrl, imageUrl, duration } = req.body;
-        if (!title || !type) return failure(res, 400, "Title and type are required");
+router.post(
+	"/",
+	requireAuth,
+	requireRole("admin", "instructor"),
+	async (req: AuthRequest, res) => {
+		try {
+			const { courseId } = req.params;
+			const {
+				title,
+				type,
+				status,
+				order,
+				videoUrl,
+				documentUrl,
+				imageUrl,
+				duration,
+				description,
+				responsibleUserId,
+				allowDownload,
+				attachments,
+			} = req.body;
+			if (!title || !type)
+				return failure(res, 400, "Title and type are required");
 
-        // Auto-order if not provided
-        const lastLesson = await Lesson.findOne({ courseId }).sort({ order: -1 });
-        const nextOrder = order ?? (lastLesson ? lastLesson.order + 1 : 1);
+			// Auto-order if not provided
+			const lastLesson = await Lesson.findOne({ courseId }).sort({
+				order: -1,
+			});
+			const nextOrder = order ?? (lastLesson ? lastLesson.order + 1 : 1);
 
-        const lesson = await Lesson.create({
-            courseId,
-            title,
-            type,
-            status: status || "draft",
-            order: nextOrder,
-            videoUrl,
-            documentUrl,
-            imageUrl,
-            duration,
-        });
-        return success(res, 201, lesson);
-    } catch (err) {
-        return failure(res, 500, `${err}`);
-    }
-});
+			const lesson = await Lesson.create({
+				courseId,
+				title,
+				type,
+				status: status || "draft",
+				order: nextOrder,
+				videoUrl,
+				documentUrl,
+				imageUrl,
+				duration,
+				description: typeof description === "string" ? description : "",
+				responsibleUserId:
+					typeof responsibleUserId === "string" ? responsibleUserId : "",
+				allowDownload:
+					typeof allowDownload === "boolean" ? allowDownload : true,
+				attachments: Array.isArray(attachments) ? attachments : [],
+			});
+			return success(res, 201, lesson);
+		} catch (err) {
+			return failure(res, 500, `${err}`);
+		}
+	},
+);
 
 // PUT /api/courses/:courseId/lessons/:lessonId
-router.put("/:lessonId", requireAuth, requireRole("admin", "instructor"), async (req: AuthRequest, res) => {
-    try {
-        const lesson = await Lesson.findOneAndUpdate(
-            { _id: req.params.lessonId, courseId: req.params.courseId },
-            req.body,
-            { returnDocument: 'after' }
-        );
-        if (!lesson) return failure(res, 404, "Lesson not found");
-        return success(res, 200, lesson);
-    } catch (err) {
-        return failure(res, 500, `${err}`);
-    }
-});
+router.put(
+	"/:lessonId",
+	requireAuth,
+	requireRole("admin", "instructor"),
+	async (req: AuthRequest, res) => {
+		try {
+			const lesson = await Lesson.findOneAndUpdate(
+				{ _id: req.params.lessonId, courseId: req.params.courseId },
+				req.body,
+				{ returnDocument: "after" },
+			);
+			if (!lesson) return failure(res, 404, "Lesson not found");
+			return success(res, 200, lesson);
+		} catch (err) {
+			return failure(res, 500, `${err}`);
+		}
+	},
+);
 
 // DELETE /api/courses/:courseId/lessons/:lessonId
-router.delete("/:lessonId", requireAuth, requireRole("admin", "instructor"), async (req: AuthRequest, res) => {
-    try {
-        const lesson = await Lesson.findOneAndDelete({ _id: req.params.lessonId, courseId: req.params.courseId });
-        if (!lesson) return failure(res, 404, "Lesson not found");
-        if (lesson.type === "quiz") await Quiz.deleteOne({ lessonId: lesson._id });
-        return success(res, 200, "Lesson deleted");
-    } catch (err) {
-        return failure(res, 500, `${err}`);
-    }
-});
+router.delete(
+	"/:lessonId",
+	requireAuth,
+	requireRole("admin", "instructor"),
+	async (req: AuthRequest, res) => {
+		try {
+			const lesson = await Lesson.findOneAndDelete({
+				_id: req.params.lessonId,
+				courseId: req.params.courseId,
+			});
+			if (!lesson) return failure(res, 404, "Lesson not found");
+			if (lesson.type === "quiz")
+				await Quiz.deleteOne({ lessonId: lesson._id });
+			return success(res, 200, "Lesson deleted");
+		} catch (err) {
+			return failure(res, 500, `${err}`);
+		}
+	},
+);
 
 export default router;

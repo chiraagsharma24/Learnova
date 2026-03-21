@@ -1,53 +1,111 @@
 import { Router } from "express";
-import { LessonProgress } from "../../models/LessonProgress.js";
-import { Lesson } from "../../models/Lesson.js";
+import { failure, success } from "../../config/response.js";
+import {
+	type AuthRequest,
+	requireAuth,
+	requireRole,
+} from "../../middlewares/auth.js";
 import { Enrollment } from "../../models/Enrollment.js";
-import { UserProfile, computeBadges } from "../../models/UserProfile.js";
-import { requireAuth, type AuthRequest } from "../../middlewares/auth.js";
-import { success, failure } from "../../config/response.js";
+import { Lesson } from "../../models/Lesson.js";
+import { LessonProgress } from "../../models/LessonProgress.js";
+import { UserProfile, LESSON_COMPLETION_XP } from "../../models/UserProfile.js";
+import { MESSAGE_CREDIT_PER_COMPLETION } from "../../lib/mentorshipMessaging.js";
+import { recomputeProfileTotals } from "../../lib/recomputeProfileTotals.js";
 
 const router = Router();
 
-//  mark a lesson as complete (non-quiz)
-router.post("/", requireAuth, async (req: AuthRequest, res) => {
-    try {
-        const { lessonId, courseId } = req.body;
-        if (!lessonId || !courseId) return failure(res, 400, "lessonId and courseId required");
-        const userId = req.user!.id;
+//  mark a lesson as complete (non-quiz) — learners only (XP / gamification)
+router.post("/", requireAuth, requireRole("learner"), async (req: AuthRequest, res) => {
+	try {
+		const { lessonId, courseId } = req.body;
+		if (!lessonId || !courseId)
+			return failure(res, 400, "lessonId and courseId required");
+		const userId = req.user!.id;
 
-        const lesson = await Lesson.findById(lessonId);
-        if (!lesson || lesson.type === "quiz") return failure(res, 400, "Use quiz attempt endpoint for quizzes");
+		const lesson = await Lesson.findById(lessonId);
+		if (!lesson || lesson.type === "quiz")
+			return failure(res, 400, "Use quiz attempt endpoint for quizzes");
 
-        await LessonProgress.findOneAndUpdate(
-            { userId, lessonId },
-            { courseId, completed: true, completedAt: new Date(), pointsEarned: 0 },
-            { upsert: true, returnDocument: 'after' }
-        );
+		const prior = await LessonProgress.findOne({ userId, lessonId });
+		const alreadyCompleted = prior?.completed === true;
+		const previousPoints = prior?.pointsEarned ?? 0;
 
-        // Update enrollment completion
-        const totalLessons = await Lesson.countDocuments({ courseId, status: "published" });
-        const completedLessons = await LessonProgress.countDocuments({ userId, courseId, completed: true });
-        const completionPercentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-        await Enrollment.findOneAndUpdate(
-            { userId, courseId },
-            { completionPercentage, ...(completionPercentage === 100 ? { completedAt: new Date() } : {}) },
-            { returnDocument: 'after' }
-        );
+		// First completion: fixed XP. Repeat calls: keep existing lesson points (no double XP).
+		// Legacy rows (completed with 0 XP): grant fixed XP once.
+		let pointsEarned: number;
+		if (alreadyCompleted) {
+			pointsEarned =
+				previousPoints > 0 ? previousPoints : LESSON_COMPLETION_XP;
+		} else {
+			pointsEarned = LESSON_COMPLETION_XP;
+		}
 
-        return success(res, 200, { completionPercentage });
-    } catch (err) {
-        return failure(res, 500, `${err}`);
-    }
+		const xpGainedThisRequest = Math.max(0, pointsEarned - previousPoints);
+
+		await LessonProgress.findOneAndUpdate(
+			{ userId, lessonId },
+			{
+				courseId,
+				completed: true,
+				completedAt: new Date(),
+				pointsEarned,
+			},
+			{ upsert: true, returnDocument: "after" },
+		);
+
+		// Update enrollment completion
+		const totalLessons = await Lesson.countDocuments({
+			courseId,
+			status: "published",
+		});
+		const completedLessons = await LessonProgress.countDocuments({
+			userId,
+			courseId,
+			completed: true,
+		});
+		const completionPercentage =
+			totalLessons > 0
+				? Math.round((completedLessons / totalLessons) * 100)
+				: 0;
+		await Enrollment.findOneAndUpdate(
+			{ userId, courseId },
+			{
+				completionPercentage,
+				...(completionPercentage === 100
+					? { completedAt: new Date() }
+					: {}),
+			},
+			{ returnDocument: "after" },
+		);
+
+		const totalPoints = await recomputeProfileTotals(userId);
+		await UserProfile.updateOne(
+			{ userId },
+			{ $inc: { messageCredits: MESSAGE_CREDIT_PER_COMPLETION } },
+		);
+
+		return success(res, 200, {
+			completionPercentage,
+			xpGainedThisRequest,
+			lessonCompletionXp: LESSON_COMPLETION_XP,
+			totalPoints,
+		});
+	} catch (err) {
+		return failure(res, 500, `${err}`);
+	}
 });
 
 //  user's progress in a course
 router.get("/course/:courseId", requireAuth, async (req: AuthRequest, res) => {
-    try {
-        const progress = await LessonProgress.find({ userId: req.user!.id, courseId: req.params.courseId });
-        return success(res, 200, progress);
-    } catch (err) {
-        return failure(res, 500, `${err}`);
-    }
+	try {
+		const progress = await LessonProgress.find({
+			userId: req.user!.id,
+			courseId: req.params.courseId,
+		});
+		return success(res, 200, progress);
+	} catch (err) {
+		return failure(res, 500, `${err}`);
+	}
 });
 
 export default router;
