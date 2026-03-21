@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, LayoutDashboard, LogOut, Menu, X, GraduationCap, ShieldCheck } from "lucide-react";
 
-import { useAuth } from "@AuthContent";
-import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Navbar() {
   const { user, logout } = useAuth();

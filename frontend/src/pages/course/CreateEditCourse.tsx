@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, Save, Trash2, Image as ImageIcon, Globe, Lock, Users, Info } from "lucide-react";
-import { fetchCourse, createCourse, updateCourse } from "../api";
+import { ChevronLeft, Save, Globe, Lock } from "lucide-react";
+import { fetchCourse, createCourse, updateCourse } from "@/fetchers/course";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 

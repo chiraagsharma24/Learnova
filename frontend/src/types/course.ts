@@ -1,3 +1,5 @@
+import type { Lesson } from "./lesson";
+
 export interface Course {
   _id: string;
   title: string;

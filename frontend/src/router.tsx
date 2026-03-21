@@ -1,20 +1,17 @@
 import { Route, Navigate, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
 
-import LandingPage from "@/components/landing";
-import { PublicLayout } from "@/components/layouts/PublicLayout";
+import { LandingPage } from "@/pages/LandingPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { InstructorLayout, PublicLayout } from "@/components/layouts";
 import NotFound from "@/components/NotFound";
 
-import { LoginPage } from "@/pages/LoginPage";
-import { RegisterPage } from "@/pages/RegisterPage";
-import { CourseCatalog } from "@/pages/CourseCatalog";
-import { LearnerDashboard } from "./pages/LearnerDashboard";
-import { CourseDetail } from "@/pages/CourseDetail";
-import { InstructorLayout } from "./components/layouts/InstructorLayout";
-import { InstructorDashboard } from "./pages/InstructorDashboard";
-import { CourseList } from "./pages/CourseList";
-import { CreateEditCourse } from "./pages/CreateEditCourse";
-import { LessonPlayer } from "./pages/LessonPlayer";
+import { RegisterPage, LoginPage } from "@/pages/auth";
+import { LearnerDashboard, InstructorDashboard } from "@/pages/dashboard";
+import { CourseCatalog, CourseDetail, CourseList, CourseReport, CreateEditCourse } from "@/pages/course";
+import { CreateEditLesson, LessonPlayer, LessonList } from "@/pages/lesson";
+import { QuizBuilder } from "@/pages/QuizBuilder";
+import { AttendeeList } from "@/pages/AttendeeList";
+import { ReviewManagement } from "@/pages/ReviewManagement";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -69,6 +66,15 @@ export const router = createBrowserRouter(
         <Route path="courses" element={<CourseList />} />
         <Route path="courses/new" element={<CreateEditCourse />} />
         <Route path="courses/:id/edit" element={<CreateEditCourse />} />
+
+        {/* Nested Course Management */}
+        <Route path="courses/:id" element={<LessonList />} />
+        <Route path="courses/:id/lessons/new" element={<CreateEditLesson />} />
+        <Route path="courses/:id/lessons/:lessonId/edit" element={<CreateEditLesson />} />
+        <Route path="courses/:id/lessons/:lessonId/quiz" element={<QuizBuilder />} />
+        <Route path="courses/:id/attendees" element={<AttendeeList />} />
+        <Route path="courses/:id/reviews" element={<ReviewManagement />} />
+        <Route path="courses/:id/reports" element={<CourseReport />} />
       </Route>
 
       {/* Not found */}

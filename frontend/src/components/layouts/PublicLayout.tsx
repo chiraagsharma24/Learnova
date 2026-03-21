@@ -14,3 +14,4 @@ export function PublicLayout({ children }: Props) {
       <main>{children}</main>
     </div>
   );
+}
