@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, LayoutDashboard, LogOut, Menu, X, GraduationCap, ShieldCheck } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -47,15 +50,39 @@ export function Navbar() {
             </Link>
           )}
           {user ? (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-500">Hi, {user.name.split(" ")[0]}</span>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700 transition-colors font-medium"
-              >
-                <LogOut className="w-4 h-4" /> Logout
-              </button>
-            </div>
+            <>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Avatar className="cursor-pointer hover:ring-2 ring-foreground/20 transition-all">
+                    {/*<AvatarImage src={session?.user.image ?? ""} alt="profile" />*/}
+                    <AvatarFallback className="font-bold">{user.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 rounded-2xl p-6 shadow-2xl border-border/50" align="end">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="w-12 h-12">
+                        {/*<AvatarImage src={session?.user.image ?? ""} alt="profile" />*/}
+                        <AvatarFallback className="text-lg font-bold">{user.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-bold leading-none mb-1">{user.name}</h3>
+                        <p className="text-sm text-muted-foreground leading-none">{user.email}</p>
+                      </div>
+                    </div>
+                    <div className="grid gap-3">
+                      <Button
+                        variant={"outline"}
+                        className="rounded-xl font-bold text-destructive hover:bg-destructive/5 hover:text-destructive"
+                        onClick={handleLogout}
+                      >
+                        Logout
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </>
           ) : (
             <div className="flex gap-2">
               <Link
