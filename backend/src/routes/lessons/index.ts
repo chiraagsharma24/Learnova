@@ -3,6 +3,7 @@ import { Lesson } from "../../models/Lesson.js";
 import { Quiz } from "../../models/Quiz.js";
 import { requireAuth, requireRole, type AuthRequest } from "../../middlewares/auth.js";
 import { success, failure } from "../../config/response.js";
+import { recalculateAllCourseEnrollments } from "../../utils/progress.js";
 
 const router = Router({ mergeParams: true });
 
@@ -60,6 +61,12 @@ router.post("/", requireAuth, requireRole("admin", "instructor"), async (req: Au
             imageUrl,
             duration,
         });
+
+        // Recalculate progress for all students if published
+        if (lesson.status === "published") {
+            await recalculateAllCourseEnrollments(courseId);
+        }
+
         return success(res, 201, lesson);
     } catch (err) {
         return failure(res, 500, `${err}`);
@@ -75,6 +82,10 @@ router.put("/:lessonId", requireAuth, requireRole("admin", "instructor"), async 
             { returnDocument: 'after' }
         );
         if (!lesson) return failure(res, 404, "Lesson not found");
+
+        // Recalculate progress for all students
+        await recalculateAllCourseEnrollments(req.params.courseId);
+
         return success(res, 200, lesson);
     } catch (err) {
         return failure(res, 500, `${err}`);
@@ -87,6 +98,10 @@ router.delete("/:lessonId", requireAuth, requireRole("admin", "instructor"), asy
         const lesson = await Lesson.findOneAndDelete({ _id: req.params.lessonId, courseId: req.params.courseId });
         if (!lesson) return failure(res, 404, "Lesson not found");
         if (lesson.type === "quiz") await Quiz.deleteOne({ lessonId: lesson._id });
+
+        // Recalculate progress for all students
+        await recalculateAllCourseEnrollments(req.params.courseId);
+
         return success(res, 200, "Lesson deleted");
     } catch (err) {
         return failure(res, 500, `${err}`);

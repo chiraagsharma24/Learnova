@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Trophy, BookOpen, Clock, ArrowRight, School } from "lucide-react";
+import { Trophy, BookOpen, Clock, ArrowRight, School, X } from "lucide-react";
 import toast from "react-hot-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 import { fetchLearnerStats } from "@/fetchers/progress";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +10,7 @@ import { fetchMyEnrollments } from "@/fetchers/enrollment";
 
 export function LearnerDashboard() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, becomeInstructor } = useAuth();
 
   const { data: enrollments, isLoading: enrollmentsLoading } = useQuery({
@@ -49,20 +51,46 @@ export function LearnerDashboard() {
                 <p className="text-indigo-100 font-medium mb-6 max-w-md">
                   Upgrade your account to an instructor profile and start creating your own courses today.
                 </p>
-                <button
-                  onClick={async () => {
-                    try {
-                      await becomeInstructor();
-                      toast.success("You are now an instructor!");
-                      navigate("/instructor/dashboard");
-                    } catch (err) {
-                      toast.error("Failed to upgrade account");
-                    }
-                  }}
-                  className="bg-white text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95 shadow-xl shadow-indigo-900/20"
-                >
-                  Become an Instructor <ArrowRight className="w-4 h-4" />
-                </button>
+                {user?.instructorRequestStatus === "pending" ? (
+                  <div className="bg-amber-50 text-amber-700 px-6 py-4 rounded-xl font-bold border border-amber-100 flex items-center gap-3">
+                    <Clock className="w-5 h-5" /> Your instructor request is pending admin approval.
+                  </div>
+                ) : user?.instructorRequestStatus === "rejected" ? (
+                  <div className="space-y-4">
+                    <div className="bg-rose-50 text-rose-700 px-6 py-4 rounded-xl font-bold border border-rose-100 flex items-center gap-3">
+                      <X className="w-5 h-5" /> Your instructor request was declined.
+                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await becomeInstructor();
+                          toast.success("Request re-submitted!");
+                          queryClient.invalidateQueries({ queryKey: ["user"] });
+                        } catch (err) {
+                          toast.error("Failed to submit request");
+                        }
+                      }}
+                      className="bg-white text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95 shadow-xl shadow-indigo-900/20"
+                    >
+                      Try Again <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      try {
+                        await becomeInstructor();
+                        toast.success("Request submitted to admin!");
+                        queryClient.invalidateQueries({ queryKey: ["user"] });
+                      } catch (err) {
+                        toast.error("Failed to submit request");
+                      }
+                    }}
+                    className="bg-white text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95 shadow-xl shadow-indigo-900/20"
+                  >
+                    Become an Instructor <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -191,7 +219,17 @@ export function LearnerDashboard() {
                     <span className="text-sm font-black text-slate-900">{stat.value}</span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-50 rounded-full overflow-hidden">
-                    <div className={stat.color + " h-full w-[60%]"} />
+                    <div
+                      className={cn(stat.color, "h-full transition-all duration-1000")}
+                      style={{
+                        width:
+                          stat.label === "Avg. Score"
+                            ? stat.value
+                            : stat.label === "Quizzes Taken"
+                              ? `${Math.min((stat.value as number) * 10, 100)}%`
+                              : `${Math.min((stat.value as number) * 20, 100)}%`,
+                      }}
+                    />
                   </div>
                 </div>
               ))}

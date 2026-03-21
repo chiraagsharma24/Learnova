@@ -2,6 +2,7 @@ import { Router } from "express";
 import { Enrollment } from "../../models/Enrollment.js";
 import { LessonProgress } from "../../models/LessonProgress.js";
 import { Lesson } from "../../models/Lesson.js";
+import { Course } from "../../models/Course.js";
 import { UserProfile } from "../../models/UserProfile.js";
 import { requireAuth, requireRole } from "../../middlewares/auth.js";
 import { success, failure } from "../../config/response.js";
@@ -9,7 +10,7 @@ import { success, failure } from "../../config/response.js";
 const router = Router();
 
 // GET /api/reports/course/:courseId - completion report for a course
-router.get("/course/:courseId", requireAuth, requireRole("admin", "instructor"), async (req, res) => {
+router.get("/course/:courseId", requireAuth, requireRole("admin", "instructor"), async (req: any, res: any) => {
     try {
         const { courseId } = req.params;
         const enrollments = await Enrollment.find({ courseId });
@@ -45,6 +46,53 @@ router.get("/course/:courseId", requireAuth, requireRole("admin", "instructor"),
                 : 0,
             learners: report,
         });
+    } catch (err) {
+        return failure(res, 500, `${err}`);
+    }
+});
+
+// GET /api/reports/admin/stats - (Admin only) system-wide stats
+router.get("/admin/stats", requireAuth, requireRole("admin"), async (req: any, res: any) => {
+    try {
+        const totalCourses = await Course.countDocuments();
+        const totalStudents = await UserProfile.countDocuments({ role: "learner" });
+        const totalInstructors = await UserProfile.countDocuments({ role: "instructor" });
+        const totalEnrollments = await Enrollment.countDocuments();
+
+        console.log(`[AdminStats] Courses: ${totalCourses}, Students: ${totalStudents}, Instructors: ${totalInstructors}, Enrollments: ${totalEnrollments}`);
+
+        // Latest courses
+        const latestCourses = await Course.find().sort({ createdAt: -1 }).limit(5);
+
+        // Latest enrollment activity
+        const latestEnrollments = await Enrollment.find()
+            .populate("courseId")
+            .sort({ enrolledAt: -1 })
+            .limit(5);
+
+        const enrollmentActivity = await Promise.all(
+            latestEnrollments.map(async (e) => {
+                const profile = await UserProfile.findOne({ userId: e.userId });
+                return {
+                    courseTitle: (e.courseId as any)?.title || "Unknown Course",
+                    studentName: profile?.name || "Unknown Student",
+                    enrolledAt: e.enrolledAt,
+                };
+            })
+        );
+
+        const statsResponse = {
+            totalCourses,
+            totalStudents,
+            totalInstructors,
+            totalEnrollments,
+            latestCourses,
+            enrollmentActivity,
+        };
+
+        console.log("[AdminStats] Sending Response:", JSON.stringify(statsResponse, null, 2));
+
+        return success(res, 200, statsResponse);
     } catch (err) {
         return failure(res, 500, `${err}`);
     }

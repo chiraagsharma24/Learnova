@@ -6,4 +6,5 @@ export interface UserProfile {
   role: "admin" | "instructor" | "learner";
   totalPoints: number;
   badges: string[];
+  instructorRequestStatus?: "pending" | "approved" | "rejected";
 }

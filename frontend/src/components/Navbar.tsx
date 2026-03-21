@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, LogOut, Menu, X, GraduationCap, ShieldCheck } from "lucide-react";
+import { BookOpen, LayoutDashboard, LogOut, Menu, X, GraduationCap, ShieldCheck, Settings2 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -59,6 +59,17 @@ export function Navbar() {
               )}
             >
               <ShieldCheck className="w-4 h-4" /> Backoffice
+            </Link>
+          )}
+          {user && user.role === "admin" && (
+            <Link
+              to="/admin/dashboard"
+              className={cn(
+                "text-sm font-medium transition-colors flex items-center gap-1.5",
+                location.pathname.startsWith("/admin") ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600",
+              )}
+            >
+              <Settings2 className="w-4 h-4" /> Admin
             </Link>
           )}
           {user ? (
@@ -136,6 +147,15 @@ export function Navbar() {
               className="block py-2 text-sm text-slate-700"
             >
               Backoffice
+            </Link>
+          )}
+          {user && user.role === "admin" && (
+            <Link
+              to="/admin/dashboard"
+              onClick={() => setMobileOpen(false)}
+              className="block py-2 text-sm text-slate-700"
+            >
+              Admin Dashboard
             </Link>
           )}
           {user ? (

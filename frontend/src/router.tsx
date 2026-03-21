@@ -6,7 +6,7 @@ import { InstructorLayout, PublicLayout } from "@/components/layouts";
 import NotFound from "@/components/NotFound";
 
 import { RegisterPage, LoginPage } from "@/pages/auth";
-import { LearnerDashboard, InstructorDashboard } from "@/pages/dashboard";
+import { LearnerDashboard, InstructorDashboard, AdminDashboard } from "@/pages/dashboard";
 import { CourseCatalog, CourseDetail, CourseList, CourseReport, CreateEditCourse } from "@/pages/course";
 import { CreateEditLesson, LessonPlayer, LessonList } from "@/pages/lesson";
 import { QuizBuilder } from "@/pages/QuizBuilder";
@@ -37,6 +37,18 @@ export const router = createBrowserRouter(
           <ProtectedRoute allowedRoles={["learner", "instructor", "admin"]}>
             <PublicLayout>
               <LearnerDashboard />
+            </PublicLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Routes */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <PublicLayout>
+              <AdminDashboard />
             </PublicLayout>
           </ProtectedRoute>
         }

@@ -6,6 +6,7 @@ import { UserProfile, computeBadges } from "../../models/UserProfile.js";
 import { Enrollment } from "../../models/Enrollment.js";
 import { requireAuth, requireRole, type AuthRequest } from "../../middlewares/auth.js";
 import { success, failure } from "../../config/response.js";
+import { recalculateEnrollmentProgress } from "../../utils/progress.js";
 import mongoose from "mongoose";
 
 const router = Router({ mergeParams: true });
@@ -136,14 +137,7 @@ router.post("/attempt", requireAuth, async (req: AuthRequest, res) => {
         // Update enrollment completion
         const lesson = await Lesson.findById(lessonId);
         if (lesson) {
-            const totalLessons = await Lesson.countDocuments({ courseId, status: "published" });
-            const completedLessons = await LessonProgress.countDocuments({ userId, courseId, completed: true });
-            const completionPercentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-            await Enrollment.findOneAndUpdate(
-                { userId, courseId },
-                { completionPercentage, ...(completionPercentage === 100 ? { completedAt: new Date() } : {}) },
-                { returnDocument: 'after' }
-            );
+            await recalculateEnrollmentProgress(userId, courseId);
         }
 
         return success(res, 200, {

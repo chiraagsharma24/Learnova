@@ -10,6 +10,7 @@ export interface IUserProfile extends Document {
     role: UserRole;
     totalPoints: number;
     badges: BadgeName[];
+    instructorRequestStatus?: "pending" | "approved" | "rejected";
     createdAt: Date;
     updatedAt: Date;
 }
@@ -30,6 +31,7 @@ const UserProfileSchema = new Schema<IUserProfile>(
         role: { type: String, enum: ["admin", "instructor", "learner"], default: "learner" },
         totalPoints: { type: Number, default: 0 },
         badges: [{ type: String }],
+        instructorRequestStatus: { type: String, enum: ["pending", "approved", "rejected"], default: null },
     },
     { timestamps: true }
 );
