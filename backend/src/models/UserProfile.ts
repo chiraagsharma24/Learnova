@@ -3,11 +3,24 @@ import mongoose, { Schema, type Document } from "mongoose";
 export type UserRole = "admin" | "instructor" | "learner";
 export type BadgeName = string;
 
+<<<<<<< HEAD
 export interface IUserArtifact {
 	name: string;
 	description: string;
 	level: number;
 	unlockedAt: Date;
+=======
+export interface IUserProfile extends Document {
+    userId: string; // Matches better-auth user id
+    email: string;
+    name: string;
+    role: UserRole;
+    totalPoints: number;
+    badges: BadgeName[];
+    instructorRequestStatus?: "pending" | "approved" | "rejected";
+    createdAt: Date;
+    updatedAt: Date;
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 }
 
 export interface ILevelPath {
@@ -115,6 +128,7 @@ const BADGE_THRESHOLDS: Record<string, number> = {
 };
 
 const UserProfileSchema = new Schema<IUserProfile>(
+<<<<<<< HEAD
 	{
 		userId: { type: String, required: true, unique: true },
 		email: { type: String, required: true },
@@ -152,6 +166,18 @@ const UserProfileSchema = new Schema<IUserProfile>(
 		blocked: { type: Boolean, default: false },
 	},
 	{ timestamps: true },
+=======
+    {
+        userId: { type: String, required: true, unique: true },
+        email: { type: String, required: true },
+        name: { type: String, required: true },
+        role: { type: String, enum: ["admin", "instructor", "learner"], default: "learner" },
+        totalPoints: { type: Number, default: 0 },
+        badges: [{ type: String }],
+        instructorRequestStatus: { type: String, enum: ["pending", "approved", "rejected"], default: null },
+    },
+    { timestamps: true }
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 );
 
 export function getLevelFromXP(points: number): ILevelPath {

@@ -40,7 +40,14 @@ export function CreateEditCourse() {
   const tabParam = (searchParams.get("tab") as TabId) || "content";
   const activeTab: TabId = tabs.some((t) => t.id === tabParam) ? tabParam : "content";
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    image: string;
+    description: string;
+    visibility: "everyone" | "signed-in";
+    access: "open" | "invitation";
+    active: boolean;
+  }>({
     title: "",
     image: "",
     description: "",
@@ -203,6 +210,7 @@ export function CreateEditCourse() {
             />
           </div>
           <div>
+<<<<<<< HEAD
             <label className="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
               Course image (URL)
             </label>
@@ -216,6 +224,34 @@ export function CreateEditCourse() {
               />
               <div className="w-24 h-16 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shrink-0">
                 {formData.image && <img src={formData.image} alt="" className="w-full h-full object-cover" />}
+=======
+            <label className="block text-sm font-black text-slate-700 uppercase tracking-wider mb-2">
+              Course Cover Image
+            </label>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setFormData({ ...formData, image: reader.result as string });
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="w-full px-5 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                />
+                <p className="mt-2 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                  Recommendation: 1280x720px, max 2MB
+                </p>
+              </div>
+              <div className="w-20 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0 border border-slate-200">
+                {formData.image && <img src={formData.image} className="w-full h-full object-cover" />}
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
               </div>
             </div>
           </div>

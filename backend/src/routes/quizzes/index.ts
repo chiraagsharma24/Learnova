@@ -8,10 +8,19 @@ import {
 import { Enrollment } from "../../models/Enrollment.js";
 import { Lesson } from "../../models/Lesson.js";
 import { LessonProgress } from "../../models/LessonProgress.js";
+<<<<<<< HEAD
 import { Quiz } from "../../models/Quiz.js";
 import { UserProfile } from "../../models/UserProfile.js";
 import { MESSAGE_CREDIT_PER_COMPLETION } from "../../lib/mentorshipMessaging.js";
 import { recomputeProfileTotals } from "../../lib/recomputeProfileTotals.js";
+=======
+import { UserProfile, computeBadges } from "../../models/UserProfile.js";
+import { Enrollment } from "../../models/Enrollment.js";
+import { requireAuth, requireRole, type AuthRequest } from "../../middlewares/auth.js";
+import { success, failure } from "../../config/response.js";
+import { recalculateEnrollmentProgress } from "../../utils/progress.js";
+import mongoose from "mongoose";
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 
 const router = Router({ mergeParams: true });
 
@@ -188,6 +197,7 @@ router.post("/attempt", requireAuth, requireRole("learner"), async (req: AuthReq
 			);
 		}
 
+<<<<<<< HEAD
 		return success(res, 200, {
 			scorePercentage,
 			correctCount,
@@ -199,6 +209,32 @@ router.post("/attempt", requireAuth, requireRole("learner"), async (req: AuthReq
 	} catch (err) {
 		return failure(res, 500, `${err}`);
 	}
+=======
+        const badges = computeBadges(totalPoints);
+        await UserProfile.findOneAndUpdate(
+            { userId },
+            { totalPoints, badges },
+            { returnDocument: 'after' }
+        );
+
+        // Update enrollment completion
+        const lesson = await Lesson.findById(lessonId);
+        if (lesson) {
+            await recalculateEnrollmentProgress(userId, courseId);
+        }
+
+        return success(res, 200, {
+            scorePercentage,
+            correctCount,
+            totalQuestions: quiz.questions.length,
+            earnedPoints,
+            attemptNumber,
+            totalPoints,
+        });
+    } catch (err) {
+        return failure(res, 500, `${err}`);
+    }
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 });
 
 export default router;

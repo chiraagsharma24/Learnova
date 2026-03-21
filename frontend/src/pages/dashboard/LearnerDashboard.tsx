@@ -1,8 +1,15 @@
+<<<<<<< HEAD
 import { Link } from "react-router-dom";
 import { Trophy, BookOpen, Clock, ArrowRight, School, Flame, Gem, X } from "lucide-react";
+=======
+import { Link, useNavigate } from "react-router-dom";
+import { Trophy, BookOpen, Clock, ArrowRight, School, X } from "lucide-react";
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 import toast from "react-hot-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
+import { fetchLearnerStats } from "@/fetchers/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchMyEnrollments } from "@/fetchers/enrollment";
 
@@ -17,6 +24,11 @@ const LEVEL_PATHS = [
 ];
 
 export function LearnerDashboard() {
+<<<<<<< HEAD
+=======
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
   const { user, becomeInstructor } = useAuth();
 
   const { data: enrollments, isLoading: enrollmentsLoading } = useQuery({
@@ -24,8 +36,12 @@ export function LearnerDashboard() {
     queryFn: fetchMyEnrollments,
   });
 
-  if (enrollmentsLoading) return <div className="p-8 text-slate-500">Loading your progress...</div>;
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ["learner-stats"],
+    queryFn: fetchLearnerStats,
+  });
 
+<<<<<<< HEAD
   const totalPoints = user?.totalPoints || 0;
   const badges = user?.badges || [];
   const artifacts = user?.artifacts || [];
@@ -39,15 +55,21 @@ export function LearnerDashboard() {
         100
       )
     : 100;
+=======
+  if (enrollmentsLoading || statsLoading) return <div className="p-8 text-slate-500">Loading your progress...</div>;
+
+  const totalPoints = stats?.totalPoints || 0;
+  const badgesCount = stats?.badgesCount || 0;
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
   const activeCourses = enrollments?.filter((e) => e.completionPercentage < 100) || [];
-  const completedCoursesCount = enrollments?.filter((e) => e.completionPercentage === 100).length || 0;
+  const completedCoursesCount = stats?.completedCoursesCount || 0;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-10">
         <h1 className="text-3xl font-black text-slate-900 mb-2">Welcome back, {user?.name.split(" ")[0]}!</h1>
         <p className="text-slate-500 font-medium tracking-tight">
-          You've earned {totalPoints} points and {badges.length} badges so far.
+          You've earned {totalPoints} points and {badgesCount} badges so far.
         </p>
       </div>
 
@@ -111,12 +133,20 @@ export function LearnerDashboard() {
                       <X className="w-5 h-5" /> Your instructor request was declined.
                     </div>
                     <button
+<<<<<<< HEAD
                       type="button"
+=======
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
                       onClick={async () => {
                         try {
                           await becomeInstructor();
                           toast.success("Request re-submitted!");
+<<<<<<< HEAD
                         } catch {
+=======
+                          queryClient.invalidateQueries({ queryKey: ["user"] });
+                        } catch (err) {
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
                           toast.error("Failed to submit request");
                         }
                       }}
@@ -127,12 +157,20 @@ export function LearnerDashboard() {
                   </div>
                 ) : (
                   <button
+<<<<<<< HEAD
                     type="button"
+=======
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
                     onClick={async () => {
                       try {
                         await becomeInstructor();
                         toast.success("Request submitted to admin!");
+<<<<<<< HEAD
                       } catch {
+=======
+                        queryClient.invalidateQueries({ queryKey: ["user"] });
+                      } catch (err) {
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
                         toast.error("Failed to submit request");
                       }
                     }}
@@ -227,6 +265,34 @@ export function LearnerDashboard() {
         </div>
 
         <div className="space-y-10">
+          {/*<div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Trophy className="w-32 h-32" />
+            </div>
+            <div className="relative">
+              <h3 className="text-xl font-black mb-6 uppercase tracking-widest text-indigo-400 text-xs">Achiements</h3>
+              <div className="space-y-6">
+                {user?.badges && user.badges.length > 0 ? (
+                  user.badges.map((badge: string, i: number) => (
+                    <div key={i} className="flex items-center gap-4 bg-white/5 p-4 rounded-3xl border border-white/10">
+                      <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
+                        <Trophy className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-black text-sm uppercase tracking-widest">{badge}</div>
+                        <div className="text-xs text-indigo-300 font-bold">Badge Unlocked</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-indigo-300/50 text-sm font-bold italic py-4">
+                    No badges earned yet. Complete lessons to unlock!
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>*/}
+
           <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm">
             <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-6">Learning Path</h3>
             <div className="space-y-3">
@@ -260,9 +326,15 @@ export function LearnerDashboard() {
             <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-8">Learning Stats</h3>
             <div className="space-y-8">
               {[
+<<<<<<< HEAD
                 { label: "Current Streak", value: `${user?.streakCount || 0} days`, color: "bg-orange-500", icon: Flame },
                 { label: "Longest Streak", value: `${user?.longestStreak || 0} days`, color: "bg-emerald-500", icon: Clock },
                 { label: "Artifacts", value: `${artifacts.length}`, color: "bg-purple-500", icon: Gem },
+=======
+                { label: "Quizzes Taken", value: stats?.quizzesTaken || 0, color: "bg-blue-500" },
+                { label: "Avg. Score", value: stats?.averageScore || "0%", color: "bg-emerald-500" },
+                { label: "Certificates", value: stats?.completedCoursesCount || 0, color: "bg-purple-500" },
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
               ].map((stat) => (
                 <div key={stat.label}>
                   <div className="flex items-center justify-between mb-2">
@@ -273,7 +345,21 @@ export function LearnerDashboard() {
                     <span className="text-sm font-black text-slate-900">{stat.value}</span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-50 rounded-full overflow-hidden">
+<<<<<<< HEAD
                     <div className={stat.color + " h-full w-[75%]"} />
+=======
+                    <div
+                      className={cn(stat.color, "h-full transition-all duration-1000")}
+                      style={{
+                        width:
+                          stat.label === "Avg. Score"
+                            ? stat.value
+                            : stat.label === "Quizzes Taken"
+                              ? `${Math.min((stat.value as number) * 10, 100)}%`
+                              : `${Math.min((stat.value as number) * 20, 100)}%`,
+                      }}
+                    />
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
                   </div>
                 </div>
               ))}

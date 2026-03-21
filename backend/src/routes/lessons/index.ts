@@ -7,6 +7,12 @@ import {
 } from "../../middlewares/auth.js";
 import { Lesson } from "../../models/Lesson.js";
 import { Quiz } from "../../models/Quiz.js";
+<<<<<<< HEAD
+=======
+import { requireAuth, requireRole, type AuthRequest } from "../../middlewares/auth.js";
+import { success, failure } from "../../config/response.js";
+import { recalculateAllCourseEnrollments } from "../../utils/progress.js";
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 
 const router = Router({ mergeParams: true });
 
@@ -76,6 +82,7 @@ router.post(
 			});
 			const nextOrder = order ?? (lastLesson ? lastLesson.order + 1 : 1);
 
+<<<<<<< HEAD
 			const lesson = await Lesson.create({
 				courseId,
 				title,
@@ -140,5 +147,64 @@ router.delete(
 		}
 	},
 );
+=======
+        const lesson = await Lesson.create({
+            courseId,
+            title,
+            type,
+            status: status || "draft",
+            order: nextOrder,
+            videoUrl,
+            documentUrl,
+            imageUrl,
+            duration,
+        });
+
+        // Recalculate progress for all students if published
+        if (lesson.status === "published") {
+            await recalculateAllCourseEnrollments(courseId);
+        }
+
+        return success(res, 201, lesson);
+    } catch (err) {
+        return failure(res, 500, `${err}`);
+    }
+});
+
+// PUT /api/courses/:courseId/lessons/:lessonId
+router.put("/:lessonId", requireAuth, requireRole("admin", "instructor"), async (req: AuthRequest, res) => {
+    try {
+        const lesson = await Lesson.findOneAndUpdate(
+            { _id: req.params.lessonId, courseId: req.params.courseId },
+            req.body,
+            { returnDocument: 'after' }
+        );
+        if (!lesson) return failure(res, 404, "Lesson not found");
+
+        // Recalculate progress for all students
+        await recalculateAllCourseEnrollments(req.params.courseId);
+
+        return success(res, 200, lesson);
+    } catch (err) {
+        return failure(res, 500, `${err}`);
+    }
+});
+
+// DELETE /api/courses/:courseId/lessons/:lessonId
+router.delete("/:lessonId", requireAuth, requireRole("admin", "instructor"), async (req: AuthRequest, res) => {
+    try {
+        const lesson = await Lesson.findOneAndDelete({ _id: req.params.lessonId, courseId: req.params.courseId });
+        if (!lesson) return failure(res, 404, "Lesson not found");
+        if (lesson.type === "quiz") await Quiz.deleteOne({ lessonId: lesson._id });
+
+        // Recalculate progress for all students
+        await recalculateAllCourseEnrollments(req.params.courseId);
+
+        return success(res, 200, "Lesson deleted");
+    } catch (err) {
+        return failure(res, 500, `${err}`);
+    }
+});
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 
 export default router;

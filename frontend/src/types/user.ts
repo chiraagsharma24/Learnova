@@ -6,6 +6,7 @@ export interface UserProfile {
   role: "admin" | "instructor" | "learner";
   totalPoints: number;
   badges: string[];
+<<<<<<< HEAD
   level: number;
   levelName: string;
   streakCount: number;
@@ -24,4 +25,7 @@ export interface UserProfile {
   messageCredits?: number;
   instructorRequestStatus?: "pending" | "approved" | "rejected";
   blocked?: boolean;
+=======
+  instructorRequestStatus?: "pending" | "approved" | "rejected";
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 }

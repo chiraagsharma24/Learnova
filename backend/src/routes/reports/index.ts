@@ -8,7 +8,11 @@ import {
 import { Course } from "../../models/Course.js";
 import { Enrollment } from "../../models/Enrollment.js";
 import { Lesson } from "../../models/Lesson.js";
+<<<<<<< HEAD
 import { LessonProgress } from "../../models/LessonProgress.js";
+=======
+import { Course } from "../../models/Course.js";
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 import { UserProfile } from "../../models/UserProfile.js";
 
 const router = Router();
@@ -134,6 +138,7 @@ router.get(
 );
 
 // GET /api/reports/course/:courseId - completion report for a course
+<<<<<<< HEAD
 router.get(
 	"/course/:courseId",
 	requireAuth,
@@ -146,6 +151,13 @@ router.get(
 				courseId,
 				status: "published",
 			});
+=======
+router.get("/course/:courseId", requireAuth, requireRole("admin", "instructor"), async (req: any, res: any) => {
+    try {
+        const { courseId } = req.params;
+        const enrollments = await Enrollment.find({ courseId });
+        const totalLessons = await Lesson.countDocuments({ courseId, status: "published" });
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 
 			const report = await Promise.all(
 				enrollments.map(async (e) => {
@@ -337,5 +349,52 @@ router.get(
 		}
 	},
 );
+
+// GET /api/reports/admin/stats - (Admin only) system-wide stats
+router.get("/admin/stats", requireAuth, requireRole("admin"), async (req: any, res: any) => {
+    try {
+        const totalCourses = await Course.countDocuments();
+        const totalStudents = await UserProfile.countDocuments({ role: "learner" });
+        const totalInstructors = await UserProfile.countDocuments({ role: "instructor" });
+        const totalEnrollments = await Enrollment.countDocuments();
+
+        console.log(`[AdminStats] Courses: ${totalCourses}, Students: ${totalStudents}, Instructors: ${totalInstructors}, Enrollments: ${totalEnrollments}`);
+
+        // Latest courses
+        const latestCourses = await Course.find().sort({ createdAt: -1 }).limit(5);
+
+        // Latest enrollment activity
+        const latestEnrollments = await Enrollment.find()
+            .populate("courseId")
+            .sort({ enrolledAt: -1 })
+            .limit(5);
+
+        const enrollmentActivity = await Promise.all(
+            latestEnrollments.map(async (e) => {
+                const profile = await UserProfile.findOne({ userId: e.userId });
+                return {
+                    courseTitle: (e.courseId as any)?.title || "Unknown Course",
+                    studentName: profile?.name || "Unknown Student",
+                    enrolledAt: e.enrolledAt,
+                };
+            })
+        );
+
+        const statsResponse = {
+            totalCourses,
+            totalStudents,
+            totalInstructors,
+            totalEnrollments,
+            latestCourses,
+            enrollmentActivity,
+        };
+
+        console.log("[AdminStats] Sending Response:", JSON.stringify(statsResponse, null, 2));
+
+        return success(res, 200, statsResponse);
+    } catch (err) {
+        return failure(res, 500, `${err}`);
+    }
+});
 
 export default router;

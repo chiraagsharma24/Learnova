@@ -6,6 +6,7 @@ import { AdminLayout, InstructorLayout, PublicLayout } from "@/components/layout
 import NotFound from "@/components/NotFound";
 
 import { RegisterPage, LoginPage } from "@/pages/auth";
+<<<<<<< HEAD
 import { AdminDashboard, LearnerDashboardGate, InstructorReportingPage } from "@/pages/dashboard";
 import {
   AdminUsersPage,
@@ -15,6 +16,11 @@ import {
 } from "@/pages/admin";
 import { CourseCatalog, CourseDetail, CourseList, CreateEditCourse } from "@/pages/course";
 import { CreateEditLesson, LessonPlayer } from "@/pages/lesson";
+=======
+import { LearnerDashboard, InstructorDashboard, AdminDashboard } from "@/pages/dashboard";
+import { CourseCatalog, CourseDetail, CourseList, CourseReport, CreateEditCourse } from "@/pages/course";
+import { CreateEditLesson, LessonPlayer, LessonList } from "@/pages/lesson";
+>>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 import { QuizBuilder } from "@/pages/QuizBuilder";
 import { MentorshipPage } from "@/pages/MentorshipPage";
 
@@ -76,6 +82,18 @@ export const router = createBrowserRouter(
           <ProtectedRoute allowedRoles={["learner"]}>
             <PublicLayout>
               <MentorshipPage />
+            </PublicLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Routes */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <PublicLayout>
+              <AdminDashboard />
             </PublicLayout>
           </ProtectedRoute>
         }
