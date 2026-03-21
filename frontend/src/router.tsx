@@ -1,4 +1,4 @@
-import { Route, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
+import { Route, Navigate, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
 
 import LandingPage from "@/components/landing";
 import { PublicLayout } from "@/components/layouts/PublicLayout";
@@ -10,6 +10,11 @@ import { RegisterPage } from "@/pages/RegisterPage";
 import { CourseCatalog } from "@/pages/CourseCatalog";
 import { LearnerDashboard } from "./pages/LearnerDashboard";
 import { CourseDetail } from "@/pages/CourseDetail";
+import { InstructorLayout } from "./components/layouts/InstructorLayout";
+import { InstructorDashboard } from "./pages/InstructorDashboard";
+import { CourseList } from "./pages/CourseList";
+import { CreateEditCourse } from "./pages/CreateEditCourse";
+import { LessonPlayer } from "./pages/LessonPlayer";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -39,6 +44,32 @@ export const router = createBrowserRouter(
           </ProtectedRoute>
         }
       />
+
+      {/* Immersive Player (No Shared Layout) */}
+      <Route
+        path="/courses/:courseId/learn/:lessonId"
+        element={
+          <ProtectedRoute allowedRoles={["learner", "instructor", "admin"]}>
+            <LessonPlayer />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Instructor Routes */}
+      <Route
+        path="/instructor"
+        element={
+          <ProtectedRoute allowedRoles={["instructor", "admin"]}>
+            <InstructorLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<InstructorDashboard />} />
+        <Route path="courses" element={<CourseList />} />
+        <Route path="courses/new" element={<CreateEditCourse />} />
+        <Route path="courses/:id/edit" element={<CreateEditCourse />} />
+      </Route>
 
       {/* Not found */}
       <Route path="*" element={<NotFound />} />
