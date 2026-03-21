@@ -53,6 +53,8 @@ export function LessonPlayer() {
     queryFn: () => fetchCourseProgress(courseId),
   });
 
+  const isInstructor = user?.role === "instructor";
+
   const completeMutation = useMutation({
     mutationFn: () => completeLesson(lessonId, courseId),
     onSuccess: () => {
@@ -64,6 +66,7 @@ export function LessonPlayer() {
   const isCompleted = progress?.some((p) => p.lessonId === lessonId && p.completed);
 
   useEffect(() => {
+    if (isInstructor) return;
     if (lesson && lesson.type !== "quiz" && !isCompleted) {
       // Auto-complete simple lessons after 5 seconds
       const timer = setTimeout(() => {
@@ -71,7 +74,7 @@ export function LessonPlayer() {
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [lessonId, isCompleted]);
+  }, [lessonId, isCompleted, isInstructor, lesson]);
 
   if (isLoading || !lesson) return <div className="h-screen flex items-center justify-center">Loading lesson...</div>;
 
@@ -150,6 +153,11 @@ export function LessonPlayer() {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
+          {isInstructor && (
+            <div className="mx-4 mt-14 mb-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+              Instructor preview — progress and points are not saved. Learners earn XP and credits here.
+            </div>
+          )}
           {lesson.type === "video" && (
             <div className="aspect-video bg-black w-full flex items-center justify-center group overflow-hidden">
               {lesson.videoUrl ? (
@@ -158,7 +166,9 @@ export function LessonPlayer() {
                   width="100%"
                   height="100%"
                   controls
-                  onEnded={() => completeMutation.mutate()}
+                  onEnded={() => {
+                    if (!isInstructor) completeMutation.mutate();
+                  }}
                 />
               ) : (
                 <div className="text-white flex flex-col items-center gap-4">
@@ -216,7 +226,13 @@ export function LessonPlayer() {
           {lesson.type === "quiz" && lesson.quiz && (
             <div className="h-full flex items-center justify-center p-8 bg-gradient-to-br from-white to-slate-50">
               <div className="bg-white w-full max-w-3xl rounded-3xl border border-slate-100 shadow-2xl shadow-indigo-50 overflow-hidden">
-                <QuizPlayer quiz={lesson.quiz} courseId={courseId} lessonId={lessonId} onComplete={() => {}} />
+                <QuizPlayer
+                  quiz={lesson.quiz}
+                  courseId={courseId}
+                  lessonId={lessonId}
+                  onComplete={() => {}}
+                  instructorPreview={isInstructor}
+                />
               </div>
             </div>
           )}

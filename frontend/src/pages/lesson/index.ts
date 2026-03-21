@@ -1,5 +1,4 @@
-import { LessonList } from "./LessonList";
-import { LessonPlayer } from "./LessonPlayer";
 import { CreateEditLesson } from "./CreateEditLesson";
+import { LessonPlayer } from "./LessonPlayer";
 
-export { CreateEditLesson, LessonList, LessonPlayer };
+export { CreateEditLesson, LessonPlayer };

@@ -1,11 +1,11 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, BookOpen, GraduationCap, ChevronLeft } from "lucide-react";
+import { BarChart3, BookOpen, GraduationCap, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
 const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, to: "/instructor/dashboard" },
-  { label: "My Courses", icon: BookOpen, to: "/instructor/courses" },
+  { label: "Reporting", icon: BarChart3, to: "/instructor/reporting" },
+  { label: "Courses", icon: BookOpen, to: "/instructor/courses" },
 ];
 
 export function InstructorLayout() {

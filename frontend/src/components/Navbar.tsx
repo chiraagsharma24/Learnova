@@ -1,8 +1,18 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, LogOut, Menu, X, GraduationCap, ShieldCheck } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  BookOpen,
+  HeartHandshake,
+  LayoutDashboard,
+  Menu,
+  X,
+  GraduationCap,
+  ShieldCheck,
+  Settings2,
+} from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -10,6 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 export function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -29,24 +40,52 @@ export function Navbar() {
         <nav className="hidden md:flex items-center gap-6">
           <Link
             to="/courses"
-            className="text-slate-600 hover:text-indigo-600 text-sm font-medium transition-colors flex items-center gap-1.5"
+            className={cn(
+              "text-sm font-medium transition-colors flex items-center gap-1.5",
+              location.pathname.startsWith("/courses") ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600",
+            )}
           >
             <BookOpen className="w-4 h-4" /> Courses
           </Link>
-          {user && (
+          {user && user.role !== "admin" && (
             <Link
               to="/dashboard"
-              className="text-slate-600 hover:text-indigo-600 text-sm font-medium transition-colors flex items-center gap-1.5"
+              className={cn(
+                "text-sm font-medium transition-colors flex items-center gap-1.5",
+                location.pathname === "/dashboard" ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600",
+              )}
             >
               <LayoutDashboard className="w-4 h-4" /> Dashboard
             </Link>
           )}
-          {user && (user.role === "admin" || user.role === "instructor") && (
+          {user?.role === "learner" && (
             <Link
-              to="/instructor/dashboard"
+              to="/mentorship"
               className="text-slate-600 hover:text-indigo-600 text-sm font-medium transition-colors flex items-center gap-1.5"
             >
+              <HeartHandshake className="w-4 h-4" /> Mentorship
+            </Link>
+          )}
+          {user?.role === "instructor" && (
+            <Link
+              to="/instructor/reporting"
+              className={cn(
+                "text-sm font-medium transition-colors flex items-center gap-1.5",
+                location.pathname.startsWith("/instructor") ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600",
+              )}
+            >
               <ShieldCheck className="w-4 h-4" /> Backoffice
+            </Link>
+          )}
+          {user && user.role === "admin" && (
+            <Link
+              to="/admin/dashboard"
+              className={cn(
+                "text-sm font-medium transition-colors flex items-center gap-1.5",
+                location.pathname.startsWith("/admin") ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600",
+              )}
+            >
+              <Settings2 className="w-4 h-4" /> Admin
             </Link>
           )}
           {user ? (
@@ -112,18 +151,28 @@ export function Navbar() {
           <Link to="/courses" onClick={() => setMobileOpen(false)} className="block py-2 text-sm text-slate-700">
             Courses
           </Link>
-          {user && (
+          {user && user.role !== "admin" && (
             <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="block py-2 text-sm text-slate-700">
               Dashboard
             </Link>
           )}
-          {user && (user.role === "admin" || user.role === "instructor") && (
+          {user?.role === "learner" && (
+            <Link to="/mentorship" onClick={() => setMobileOpen(false)} className="block py-2 text-sm text-slate-700">
+              Mentorship
+            </Link>
+          )}
+          {user?.role === "instructor" && (
             <Link
-              to="/instructor/dashboard"
+              to="/instructor/reporting"
               onClick={() => setMobileOpen(false)}
               className="block py-2 text-sm text-slate-700"
             >
               Backoffice
+            </Link>
+          )}
+          {user && user.role === "admin" && (
+            <Link to="/admin/dashboard" onClick={() => setMobileOpen(false)} className="block py-2 text-sm text-slate-700">
+              Admin
             </Link>
           )}
           {user ? (

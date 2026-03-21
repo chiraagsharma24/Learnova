@@ -15,9 +15,11 @@ export function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(e.target.email.value, e.target.password.value);
+      const profile = await login(e.target.email.value, e.target.password.value);
       toast.success("Welcome back!");
-      navigate("/dashboard");
+      if (profile.role === "admin") navigate("/admin/dashboard");
+      else if (profile.role === "instructor") navigate("/instructor/reporting");
+      else navigate("/dashboard");
     } catch (err: any) {
       toast.error(err?.response?.data?.error || "Invalid credentials");
     } finally {

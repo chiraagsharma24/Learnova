@@ -1,17 +1,28 @@
-import { Route, Navigate, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
+import { Route, Navigate, createBrowserRouter, createRoutesFromElements, useParams } from "react-router-dom";
 
 import { LandingPage } from "@/pages/LandingPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { InstructorLayout, PublicLayout } from "@/components/layouts";
+import { AdminLayout, InstructorLayout, PublicLayout } from "@/components/layouts";
 import NotFound from "@/components/NotFound";
 
 import { RegisterPage, LoginPage } from "@/pages/auth";
-import { LearnerDashboard, InstructorDashboard } from "@/pages/dashboard";
-import { CourseCatalog, CourseDetail, CourseList, CourseReport, CreateEditCourse } from "@/pages/course";
-import { CreateEditLesson, LessonPlayer, LessonList } from "@/pages/lesson";
+import { AdminDashboard, LearnerDashboardGate, InstructorReportingPage } from "@/pages/dashboard";
+import {
+  AdminUsersPage,
+  AdminCoursesPage,
+  AdminAnalyticsPage,
+  AdminSettingsPage,
+} from "@/pages/admin";
+import { CourseCatalog, CourseDetail, CourseList, CreateEditCourse } from "@/pages/course";
+import { CreateEditLesson, LessonPlayer } from "@/pages/lesson";
 import { QuizBuilder } from "@/pages/QuizBuilder";
-import { AttendeeList } from "@/pages/AttendeeList";
-import { ReviewManagement } from "@/pages/ReviewManagement";
+import { MentorshipPage } from "@/pages/MentorshipPage";
+
+/** Instructor course hub lives on the edit page (Content tab). */
+function InstructorCourseRedirect() {
+  const { id } = useParams() as { id: string };
+  return <Navigate to={`/instructor/courses/${id}/edit?tab=content`} replace />;
+}
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -34,9 +45,37 @@ export const router = createBrowserRouter(
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute allowedRoles={["learner", "instructor", "admin"]}>
+          <ProtectedRoute allowedRoles={["learner", "instructor"]}>
             <PublicLayout>
-              <LearnerDashboard />
+              <LearnerDashboardGate />
+            </PublicLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin back-office (no learner gamification / instructor author tools) */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<AdminUsersPage />} />
+        <Route path="courses" element={<AdminCoursesPage />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
+      </Route>
+
+      <Route
+        path="/mentorship"
+        element={
+          <ProtectedRoute allowedRoles={["learner"]}>
+            <PublicLayout>
+              <MentorshipPage />
             </PublicLayout>
           </ProtectedRoute>
         }
@@ -46,35 +85,32 @@ export const router = createBrowserRouter(
       <Route
         path="/courses/:courseId/learn/:lessonId"
         element={
-          <ProtectedRoute allowedRoles={["learner", "instructor", "admin"]}>
+          <ProtectedRoute allowedRoles={["learner", "instructor"]}>
             <LessonPlayer />
           </ProtectedRoute>
         }
       />
 
-      {/* Instructor Routes */}
+      {/* Instructor Routes — A1–A8 scope only */}
       <Route
         path="/instructor"
         element={
-          <ProtectedRoute allowedRoles={["instructor", "admin"]}>
+          <ProtectedRoute allowedRoles={["instructor"]}>
             <InstructorLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<InstructorDashboard />} />
+        <Route index element={<Navigate to="reporting" replace />} />
+        <Route path="reporting" element={<InstructorReportingPage />} />
+        <Route path="dashboard" element={<Navigate to="/instructor/reporting" replace />} />
         <Route path="courses" element={<CourseList />} />
-        <Route path="courses/new" element={<CreateEditCourse />} />
+        <Route path="courses/new" element={<Navigate to="/instructor/courses" replace />} />
         <Route path="courses/:id/edit" element={<CreateEditCourse />} />
 
-        {/* Nested Course Management */}
-        <Route path="courses/:id" element={<LessonList />} />
         <Route path="courses/:id/lessons/new" element={<CreateEditLesson />} />
         <Route path="courses/:id/lessons/:lessonId/edit" element={<CreateEditLesson />} />
         <Route path="courses/:id/lessons/:lessonId/quiz" element={<QuizBuilder />} />
-        <Route path="courses/:id/attendees" element={<AttendeeList />} />
-        <Route path="courses/:id/reviews" element={<ReviewManagement />} />
-        <Route path="courses/:id/reports" element={<CourseReport />} />
+        <Route path="courses/:id" element={<InstructorCourseRedirect />} />
       </Route>
 
       {/* Not found */}

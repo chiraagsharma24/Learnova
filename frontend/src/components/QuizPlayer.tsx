@@ -11,9 +11,11 @@ interface QuizPlayerProps {
   courseId: string;
   lessonId: string;
   onComplete: (data: any) => void;
+  /** Instructor preview: no server submit / no XP (learners only) */
+  instructorPreview?: boolean;
 }
 
-export function QuizPlayer({ quiz, courseId, lessonId, onComplete }: QuizPlayerProps) {
+export function QuizPlayer({ quiz, courseId, lessonId, onComplete, instructorPreview }: QuizPlayerProps) {
   const [currentStep, setCurrentStep] = useState(0); // 0 = start, 1..n = questions, n+1 = result
   const [answers, setAnswers] = useState<{ questionId: string; choiceIndex: number }[]>([]);
   const [showResult, setShowResult] = useState(false);
@@ -51,6 +53,8 @@ export function QuizPlayer({ quiz, courseId, lessonId, onComplete }: QuizPlayerP
   const handleNext = () => {
     if (currentStep < questions.length) {
       setCurrentStep(currentStep + 1);
+    } else if (instructorPreview) {
+      toast.error("Quiz submission is for learners only. Use Backoffice to edit this quiz.");
     } else {
       mutation.mutate();
     }
@@ -120,6 +124,11 @@ export function QuizPlayer({ quiz, courseId, lessonId, onComplete }: QuizPlayerP
         <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mb-6">
           <HelpCircleIcon className="w-8 h-8 text-indigo-600" />
         </div>
+        {instructorPreview && (
+          <p className="mb-4 max-w-md rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            Instructor preview — submissions and points are disabled. Learners take this quiz from the course player.
+          </p>
+        )}
         <h2 className="text-3xl font-black text-slate-800 mb-2">Knowledge Check</h2>
         <p className="text-slate-500 mb-8 max-w-sm">
           Test your understanding with {questions.length} questions. You'll earn points based on your score and attempt

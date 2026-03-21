@@ -16,6 +16,7 @@ export function QuizBuilder() {
     { attempt: 1, pointsPercentage: 100 },
     { attempt: 2, pointsPercentage: 75 },
     { attempt: 3, pointsPercentage: 50 },
+    { attempt: 4, pointsPercentage: 25 },
   ]);
 
   const { data: quiz, isLoading } = useQuery({
@@ -27,7 +28,12 @@ export function QuizBuilder() {
     if (quiz) {
       setQuestions(quiz.questions);
       setTotalPoints(quiz.totalPoints);
-      setRewards(quiz.attemptRewards);
+      let ar = [...(quiz.attemptRewards || [])];
+      if (!ar.some((x) => x.attempt === 4)) {
+        ar.push({ attempt: 4, pointsPercentage: 25 });
+      }
+      ar.sort((a, b) => a.attempt - b.attempt);
+      setRewards(ar);
     }
   }, [quiz]);
 
@@ -95,10 +101,10 @@ export function QuizBuilder() {
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <Link
-        to={`/instructor/courses/${courseId}`}
+        to={`/instructor/courses/${courseId}/edit?tab=quiz`}
         className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 mb-8 font-medium"
       >
-        <ChevronLeft className="w-4 h-4" /> Back to Lessons
+        <ChevronLeft className="w-4 h-4" /> Back to course
       </Link>
 
       <div className="flex items-center justify-between mb-10">
@@ -215,7 +221,9 @@ export function QuizBuilder() {
                 </label>
                 {rewards.map((r, i) => (
                   <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                    <span className="text-sm font-bold text-slate-600">Attempt {r.attempt}</span>
+                    <span className="text-sm font-bold text-slate-600">
+                      {r.attempt === 4 ? "4th try and more" : `Attempt ${r.attempt}`}
+                    </span>
                     <div className="flex items-center gap-2">
                       <input
                         type="number"

@@ -33,10 +33,24 @@ export function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              to={user ? "/courses" : "/register"}
+              to={
+                user
+                  ? user.role === "instructor"
+                    ? "/instructor/reporting"
+                    : user.role === "admin"
+                      ? "/admin/dashboard"
+                      : "/courses"
+                  : "/register"
+              }
               className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-5 rounded-2xl font-black text-lg transition-all shadow-2xl shadow-indigo-200 flex items-center justify-center gap-2 group hover:scale-[1.02] active:scale-95"
             >
-              {user ? "Continue Learning" : "Start Free Trial"}{" "}
+              {user
+                ? user.role === "admin"
+                  ? "Admin dashboard"
+                  : user.role === "instructor"
+                    ? "Open Backoffice"
+                    : "Continue Learning"
+                : "Start Free Trial"}{" "}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link

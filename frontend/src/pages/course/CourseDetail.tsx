@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,7 +17,7 @@ import {
 import toast from "react-hot-toast";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchCourse } from "@/fetchers/course";
+import { fetchCourse, recordCourseView } from "@/fetchers/course";
 import { checkEnrollment } from "@/fetchers/enrollment";
 import { enrollInCourse } from "@/fetchers/enrollment";
 import { fetchCourseProgress } from "@/fetchers/progress";
@@ -39,6 +40,14 @@ export function CourseDetail() {
     queryKey: ["course", id],
     queryFn: () => fetchCourse(id),
   });
+
+  useEffect(() => {
+    if (!course || !id || !course.active) return;
+    const key = `ln_course_view_${id}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    recordCourseView(id).catch(() => {});
+  }, [course, id]);
 
   const { data: enrollmentData } = useQuery({
     queryKey: ["enrollment", id],

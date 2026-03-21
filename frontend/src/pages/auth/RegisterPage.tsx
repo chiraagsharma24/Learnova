@@ -26,7 +26,8 @@ export function RegisterPage() {
     try {
       await register(formData.name, formData.email, formData.password, formData.role);
       toast.success("Account created successfully!");
-      navigate(formData.role === "instructor" ? "/instructor/dashboard" : "/dashboard");
+      if (formData.role === "instructor") navigate("/instructor/reporting");
+      else navigate("/dashboard");
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Registration failed");
     } finally {

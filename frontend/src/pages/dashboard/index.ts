@@ -1,4 +1,6 @@
-import { InstructorDashboard } from "./InstructorDashboard";
+import { AdminDashboard } from "./AdminDashboard";
+import { InstructorReportingPage } from "./InstructorReportingPage";
 import { LearnerDashboard } from "./LearnerDashboard";
+import { LearnerDashboardGate } from "./LearnerDashboardGate";
 
-export { InstructorDashboard, LearnerDashboard };
+export { AdminDashboard, InstructorReportingPage, LearnerDashboard, LearnerDashboardGate };
