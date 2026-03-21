@@ -186,18 +186,33 @@ export function CreateEditLesson() {
               </div>
             )}
             {formData.type === "image" && (
-              <div>
-                <label className="block text-sm font-black text-slate-700 uppercase tracking-wider mb-2">
-                  Image URL
-                </label>
-                <input
-                  type="url"
-                  required
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  placeholder="https://.../infographic.jpg"
-                  className="w-full px-5 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all"
-                />
+              <div className="flex gap-4 items-end">
+                <div className="flex-1">
+                  <label className="block text-sm font-black text-slate-700 uppercase tracking-wider mb-2">
+                    Lesson Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({ ...formData, imageUrl: reader.result as string });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="w-full px-5 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                  />
+                  <p className="mt-2 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                    Upload local image (base64 encoded)
+                  </p>
+                </div>
+                <div className="w-16 h-16 bg-slate-100 rounded-xl overflow-hidden shrink-0 border border-slate-200">
+                  {formData.imageUrl && <img src={formData.imageUrl} className="w-full h-full object-cover" />}
+                </div>
               </div>
             )}
             {formData.type === "quiz" && (

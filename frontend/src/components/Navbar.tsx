@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -29,14 +30,20 @@ export function Navbar() {
         <nav className="hidden md:flex items-center gap-6">
           <Link
             to="/courses"
-            className="text-slate-600 hover:text-indigo-600 text-sm font-medium transition-colors flex items-center gap-1.5"
+            className={cn(
+              "text-sm font-medium transition-colors flex items-center gap-1.5",
+              location.pathname.startsWith("/courses") ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600",
+            )}
           >
             <BookOpen className="w-4 h-4" /> Courses
           </Link>
           {user && (
             <Link
               to="/dashboard"
-              className="text-slate-600 hover:text-indigo-600 text-sm font-medium transition-colors flex items-center gap-1.5"
+              className={cn(
+                "text-sm font-medium transition-colors flex items-center gap-1.5",
+                location.pathname === "/dashboard" ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600",
+              )}
             >
               <LayoutDashboard className="w-4 h-4" /> Dashboard
             </Link>
@@ -44,7 +51,12 @@ export function Navbar() {
           {user && (user.role === "admin" || user.role === "instructor") && (
             <Link
               to="/instructor/dashboard"
-              className="text-slate-600 hover:text-indigo-600 text-sm font-medium transition-colors flex items-center gap-1.5"
+              className={cn(
+                "text-sm font-medium transition-colors flex items-center gap-1.5",
+                location.pathname.startsWith("/instructor")
+                  ? "text-indigo-600"
+                  : "text-slate-600 hover:text-indigo-600",
+              )}
             >
               <ShieldCheck className="w-4 h-4" /> Backoffice
             </Link>

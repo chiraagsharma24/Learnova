@@ -3,6 +3,7 @@ import { Trophy, BookOpen, Clock, ArrowRight, School } from "lucide-react";
 import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 
+import { fetchLearnerStats } from "@/fetchers/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchMyEnrollments } from "@/fetchers/enrollment";
 
@@ -15,19 +16,24 @@ export function LearnerDashboard() {
     queryFn: fetchMyEnrollments,
   });
 
-  if (enrollmentsLoading) return <div className="p-8 text-slate-500">Loading your progress...</div>;
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ["learner-stats"],
+    queryFn: fetchLearnerStats,
+  });
 
-  const totalPoints = user?.totalPoints || 0;
-  const badges = user?.badges || [];
+  if (enrollmentsLoading || statsLoading) return <div className="p-8 text-slate-500">Loading your progress...</div>;
+
+  const totalPoints = stats?.totalPoints || 0;
+  const badgesCount = stats?.badgesCount || 0;
   const activeCourses = enrollments?.filter((e) => e.completionPercentage < 100) || [];
-  const completedCoursesCount = enrollments?.filter((e) => e.completionPercentage === 100).length || 0;
+  const completedCoursesCount = stats?.completedCoursesCount || 0;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-10">
         <h1 className="text-3xl font-black text-slate-900 mb-2">Welcome back, {user?.name.split(" ")[0]}!</h1>
         <p className="text-slate-500 font-medium tracking-tight">
-          You've earned {totalPoints} points and {badges.length} badges so far.
+          You've earned {totalPoints} points and {badgesCount} badges so far.
         </p>
       </div>
 
@@ -143,14 +149,42 @@ export function LearnerDashboard() {
         </div>
 
         <div className="space-y-10">
+          {/*<div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Trophy className="w-32 h-32" />
+            </div>
+            <div className="relative">
+              <h3 className="text-xl font-black mb-6 uppercase tracking-widest text-indigo-400 text-xs">Achiements</h3>
+              <div className="space-y-6">
+                {user?.badges && user.badges.length > 0 ? (
+                  user.badges.map((badge: string, i: number) => (
+                    <div key={i} className="flex items-center gap-4 bg-white/5 p-4 rounded-3xl border border-white/10">
+                      <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
+                        <Trophy className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-black text-sm uppercase tracking-widest">{badge}</div>
+                        <div className="text-xs text-indigo-300 font-bold">Badge Unlocked</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-indigo-300/50 text-sm font-bold italic py-4">
+                    No badges earned yet. Complete lessons to unlock!
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>*/}
+
           <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm">
             <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-8">Learning Stats</h3>
             <div className="space-y-8">
               {[
-                { label: "Quizzes Taken", value: "12", color: "bg-blue-500" },
-                { label: "Avg. Score", value: "88%", color: "bg-emerald-500" },
-                { label: "Certificates", value: "0", color: "bg-purple-500" },
-              ].map((stat, i) => (
+                { label: "Quizzes Taken", value: stats?.quizzesTaken || 0, color: "bg-blue-500" },
+                { label: "Avg. Score", value: stats?.averageScore || "0%", color: "bg-emerald-500" },
+                { label: "Certificates", value: stats?.completedCoursesCount || 0, color: "bg-purple-500" },
+              ].map((stat) => (
                 <div key={stat.label}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>

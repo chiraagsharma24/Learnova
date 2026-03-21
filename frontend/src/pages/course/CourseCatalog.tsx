@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, SlidersHorizontal, BookOpen } from "lucide-react";
+import { Search, BookOpen } from "lucide-react";
 import { fetchCourses } from "@/fetchers/course";
 import { CourseCard } from "@/pages/course";
 
@@ -32,9 +32,9 @@ export function CourseCatalog() {
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+          {/*<button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
             <SlidersHorizontal className="w-4 h-4" /> Filter
-          </button>
+          </button>*/}
         </div>
       </div>
 

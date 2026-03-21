@@ -8,7 +8,7 @@ import { success, failure } from "../../config/response.js";
 
 const router = Router();
 
-//  mark a lesson as complete (non-quiz)
+// POST /api/progress - mark a lesson as complete (non-quiz)
 router.post("/", requireAuth, async (req: AuthRequest, res) => {
     try {
         const { lessonId, courseId } = req.body;
@@ -40,11 +40,47 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
     }
 });
 
-//  user's progress in a course
+// GET /api/progress/course/:courseId - user's progress in a course
 router.get("/course/:courseId", requireAuth, async (req: AuthRequest, res) => {
     try {
         const progress = await LessonProgress.find({ userId: req.user!.id, courseId: req.params.courseId });
         return success(res, 200, progress);
+    } catch (err) {
+        return failure(res, 500, `${err}`);
+    }
+});
+
+// GET /api/progress/stats - summary of user's progress
+router.get("/stats", requireAuth, async (req: AuthRequest, res) => {
+    try {
+        const userId = req.user!.id;
+
+        // 1. Quizzes Stats
+        const progressWithQuizzes = await LessonProgress.find({
+            userId,
+            quizAttempts: { $gt: 0 }
+        });
+
+        const quizzesTaken = progressWithQuizzes.length;
+        const totalQuizScore = progressWithQuizzes.reduce((acc, curr) => acc + (curr.quizScore || 0), 0);
+        const averageScore = quizzesTaken > 0 ? Math.round(totalQuizScore / quizzesTaken) : 0;
+
+        // 2. Course Stats
+        const completedCoursesCount = await Enrollment.countDocuments({
+            userId,
+            completionPercentage: 100
+        });
+
+        // 3. Profile Stats (Points/Badges)
+        const profile = await UserProfile.findOne({ userId });
+
+        return success(res, 200, {
+            quizzesTaken,
+            averageScore: `${averageScore}%`,
+            completedCoursesCount,
+            totalPoints: profile?.totalPoints || 0,
+            badgesCount: profile?.badges?.length || 0
+        });
     } catch (err) {
         return failure(res, 500, `${err}`);
     }
