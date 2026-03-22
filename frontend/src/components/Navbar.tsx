@@ -1,5 +1,4 @@
 import { useState } from "react";
-<<<<<<< HEAD
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   BookOpen,
@@ -11,13 +10,8 @@ import {
   ShieldCheck,
   Settings2,
 } from "lucide-react";
-=======
-import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, LayoutDashboard, LogOut, Menu, X, GraduationCap, ShieldCheck, Settings2 } from "lucide-react";
->>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
 
 import { useAuth } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -66,18 +60,8 @@ export function Navbar() {
           )}
           {user?.role === "learner" && (
             <Link
-<<<<<<< HEAD
               to="/mentorship"
               className="text-slate-600 hover:text-indigo-600 text-sm font-medium transition-colors flex items-center gap-1.5"
-=======
-              to="/instructor/dashboard"
-              className={cn(
-                "text-sm font-medium transition-colors flex items-center gap-1.5",
-                location.pathname.startsWith("/instructor")
-                  ? "text-indigo-600"
-                  : "text-slate-600 hover:text-indigo-600",
-              )}
->>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
             >
               <HeartHandshake className="w-4 h-4" /> Mentorship
             </Link>
@@ -87,7 +71,9 @@ export function Navbar() {
               to="/instructor/reporting"
               className={cn(
                 "text-sm font-medium transition-colors flex items-center gap-1.5",
-                location.pathname.startsWith("/instructor") ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600",
+                location.pathname.startsWith("/instructor")
+                  ? "text-indigo-600"
+                  : "text-slate-600 hover:text-indigo-600",
               )}
             >
               <ShieldCheck className="w-4 h-4" /> Backoffice
@@ -187,17 +173,12 @@ export function Navbar() {
             </Link>
           )}
           {user && user.role === "admin" && (
-<<<<<<< HEAD
-            <Link to="/admin/dashboard" onClick={() => setMobileOpen(false)} className="block py-2 text-sm text-slate-700">
-              Admin
-=======
             <Link
               to="/admin/dashboard"
               onClick={() => setMobileOpen(false)}
               className="block py-2 text-sm text-slate-700"
             >
-              Admin Dashboard
->>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
+              Admin
             </Link>
           )}
           {user ? (

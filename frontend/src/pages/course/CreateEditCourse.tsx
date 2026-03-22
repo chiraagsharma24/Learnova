@@ -210,8 +210,8 @@ export function CreateEditCourse() {
             />
           </div>
           <div>
-<<<<<<< HEAD
-            <label className="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
+            {/*
+              <label className="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
               Course image (URL)
             </label>
             <div className="flex gap-4">
@@ -224,7 +224,7 @@ export function CreateEditCourse() {
               />
               <div className="w-24 h-16 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shrink-0">
                 {formData.image && <img src={formData.image} alt="" className="w-full h-full object-cover" />}
-=======
+                */}
             <label className="block text-sm font-black text-slate-700 uppercase tracking-wider mb-2">
               Course Cover Image
             </label>
@@ -251,7 +251,6 @@ export function CreateEditCourse() {
               </div>
               <div className="w-20 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0 border border-slate-200">
                 {formData.image && <img src={formData.image} className="w-full h-full object-cover" />}
->>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
               </div>
             </div>
           </div>
@@ -265,9 +264,7 @@ export function CreateEditCourse() {
               onClick={() => setTab(t.id)}
               className={cn(
                 "flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-sm font-bold transition-colors",
-                activeTab === t.id
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-500 hover:bg-slate-100",
+                activeTab === t.id ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100",
               )}
             >
               <t.icon className="w-4 h-4" /> {t.label}
@@ -300,9 +297,7 @@ export function CreateEditCourse() {
               <p className="text-xs text-slate-500 -mt-4">Who can see the course catalog entry.</p>
               <select
                 value={formData.visibility}
-                onChange={(e) =>
-                  setFormData({ ...formData, visibility: e.target.value as "everyone" | "signed-in" })
-                }
+                onChange={(e) => setFormData({ ...formData, visibility: e.target.value as "everyone" | "signed-in" })}
                 className="w-full max-w-md px-4 py-3 bg-slate-50 rounded-xl font-bold text-sm border-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="everyone">Everyone</option>
@@ -401,9 +396,7 @@ export function CreateEditCourse() {
                     {tag}
                     <button
                       type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, tags: formData.tags.filter((t) => t !== tag) })
-                      }
+                      onClick={() => setFormData({ ...formData, tags: formData.tags.filter((t) => t !== tag) })}
                       className="p-0.5 rounded hover:bg-indigo-100 text-indigo-600"
                     >
                       ×
@@ -433,7 +426,8 @@ export function CreateEditCourse() {
         {activeTab === "quiz" && (
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 space-y-4">
             <p className="text-sm text-slate-500">
-              Quiz lessons for this course. Add a lesson with type &quot;Quiz&quot; under Content, then build questions here.
+              Quiz lessons for this course. Add a lesson with type &quot;Quiz&quot; under Content, then build questions
+              here.
             </p>
             <div className="space-y-2">
               {quizLessons.map((l) => (
@@ -479,25 +473,13 @@ export function CreateEditCourse() {
   );
 }
 
-function PlaceholderModal({
-  title,
-  body,
-  onClose,
-}: {
-  title: string;
-  body: string;
-  onClose: () => void;
-}) {
+function PlaceholderModal({ title, body, onClose }: { title: string; body: string; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40" role="dialog">
       <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8">
         <h3 className="text-lg font-black text-slate-900 mb-2">{title}</h3>
         <p className="text-sm text-slate-600 mb-6">{body}</p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="w-full py-3 rounded-xl bg-slate-900 text-white font-bold"
-        >
+        <button type="button" onClick={onClose} className="w-full py-3 rounded-xl bg-slate-900 text-white font-bold">
           Close
         </button>
       </div>

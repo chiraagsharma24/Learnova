@@ -26,5 +26,8 @@ dist-ssr
 # Env files
 *.env
 
+# Database data
+mongo_data_volume/
+
 # Unnecessary files
 ToDo.md

@@ -282,31 +282,29 @@ export function CreateEditLesson() {
             )}
 
             {formData.type === "image" && (
-<<<<<<< HEAD
-              <>
-                <div>
-                  <label className="block text-sm font-black text-slate-700 uppercase tracking-wider mb-2">
-                    Image URL *
-                  </label>
-                  <input
-                    type="url"
-                    required
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    className="w-full px-5 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <label className="flex items-center gap-3 text-sm font-bold text-slate-700">
-                  <input
-                    type="checkbox"
-                    checked={formData.allowDownload}
-                    onChange={(e) => setFormData({ ...formData, allowDownload: e.target.checked })}
-                    className="rounded border-slate-300 text-indigo-600"
-                  />
-                  Allow download
-                </label>
-              </>
-=======
+              // <>
+              //   <div>
+              //     <label className="block text-sm font-black text-slate-700 uppercase tracking-wider mb-2">
+              //       Image URL *
+              //     </label>
+              //     <input
+              //       type="url"
+              //       required
+              //       value={formData.imageUrl}
+              //       onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+              //       className="w-full px-5 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500"
+              //     />
+              //   </div>
+              //   <label className="flex items-center gap-3 text-sm font-bold text-slate-700">
+              //     <input
+              //       type="checkbox"
+              //       checked={formData.allowDownload}
+              //       onChange={(e) => setFormData({ ...formData, allowDownload: e.target.checked })}
+              //       className="rounded border-slate-300 text-indigo-600"
+              //     />
+              //     Allow download
+              //   </label>
+              // </>
               <div className="flex gap-4 items-end">
                 <div className="flex-1">
                   <label className="block text-sm font-black text-slate-700 uppercase tracking-wider mb-2">
@@ -335,7 +333,6 @@ export function CreateEditLesson() {
                   {formData.imageUrl && <img src={formData.imageUrl} className="w-full h-full object-cover" />}
                 </div>
               </div>
->>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
             )}
 
             {formData.type === "quiz" && (
@@ -389,7 +386,10 @@ export function CreateEditLesson() {
               Extra files or links shown to learners with this lesson (URLs must be reachable by learners).
             </p>
             {formData.attachments.map((att, idx) => (
-              <div key={idx} className="flex flex-col sm:flex-row gap-2 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              <div
+                key={idx}
+                className="flex flex-col sm:flex-row gap-2 p-4 rounded-2xl bg-slate-50 border border-slate-100"
+              >
                 <input
                   placeholder="Label"
                   value={att.name}

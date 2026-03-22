@@ -24,12 +24,9 @@ export const approveInstructorRequest = (userId: string) =>
 
 export const rejectInstructorRequest = (userId: string) =>
   api.post(`/api/users/admin/instructor-requests/${userId}/reject`).then(extractData);
-<<<<<<< HEAD
 
 export const fetchAdminUserList = (role?: string) =>
-  api
-    .get("/api/users/admin/users", { params: role ? { role } : {} })
-    .then(extractData) as Promise<
+  api.get("/api/users/admin/users", { params: role ? { role } : {} }).then(extractData) as Promise<
     {
       userId: string;
       name: string;
@@ -43,5 +40,3 @@ export const patchAdminUser = (
   userId: string,
   body: { blocked?: boolean; role?: "learner" | "instructor" | "admin" },
 ) => api.patch(`/api/users/admin/users/${userId}`, body).then(extractData) as Promise<UserProfile>;
-=======
->>>>>>> 57a5d94da89b1f755c3515d7e0ab6fccc78b2e7d
