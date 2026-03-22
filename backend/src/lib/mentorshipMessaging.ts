@@ -8,9 +8,11 @@ export const MESSAGE_CREDIT_PER_COMPLETION = 1;
 export function isMentorshipLinked(a: IUserProfile, b: IUserProfile): boolean {
 	const aId = a.userId;
 	const bId = b.userId;
-	if (a.myMentorUserId === bId || b.myMentorUserId === aId) return true;
-	if ((a.menteeUserIds || []).includes(bId)) return true;
-	if ((b.menteeUserIds || []).includes(aId)) return true;
+	/** Only learner mentors count; admins/instructors may retain stale mentor flags. */
+	if (a.myMentorUserId === bId && b.role === "learner") return true;
+	if (b.myMentorUserId === aId && a.role === "learner") return true;
+	if (a.role === "learner" && (a.menteeUserIds || []).includes(bId)) return true;
+	if (b.role === "learner" && (b.menteeUserIds || []).includes(aId)) return true;
 	return false;
 }
 

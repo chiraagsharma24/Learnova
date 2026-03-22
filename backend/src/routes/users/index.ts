@@ -220,6 +220,20 @@ router.patch("/admin/users/:userId", requireAuth, requireRole("admin"), async (r
     if (blocked !== undefined) profile.blocked = Boolean(blocked);
     if (role !== undefined) profile.role = role as (typeof ROLES)[number];
 
+    if (profile.role === "admin" || profile.role === "instructor") {
+      const menteeIds = [...(profile.menteeUserIds || [])];
+      if (profile.isMentor || menteeIds.length > 0) {
+        profile.isMentor = false;
+        profile.menteeUserIds = [];
+        if (menteeIds.length > 0) {
+          await UserProfile.updateMany(
+            { userId: { $in: menteeIds }, myMentorUserId: userId },
+            { $unset: { myMentorUserId: 1 } },
+          );
+        }
+      }
+    }
+
     await profile.save();
     return success(res, 200, profile);
   } catch (err) {

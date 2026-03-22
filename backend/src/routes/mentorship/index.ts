@@ -76,6 +76,7 @@ router.get(
 
 		const mentors = await UserProfile.find({
 			isMentor: true,
+			role: "learner",
 			userId: { $ne: me.userId },
 		}).lean();
 
@@ -127,7 +128,7 @@ router.get("/network", requireAuth, requireRole("learner"), async (req: AuthRequ
 		} | null = null;
 		if (me.myMentorUserId) {
 			const m = await UserProfile.findOne({ userId: me.myMentorUserId }).lean();
-			if (m) {
+			if (m && m.role === "learner") {
 				mentorSummary = {
 					userId: m.userId,
 					name: m.name,
@@ -168,6 +169,9 @@ router.post("/connect", requireAuth, requireRole("learner"), async (req: AuthReq
 		const mentee = await UserProfile.findOne({ userId: req.user!.id });
 		const mentor = await UserProfile.findOne({ userId: mentorUserId });
 		if (!mentee || !mentor) return failure(res, 404, "Profile not found");
+		if (mentor.role !== "learner") {
+			return failure(res, 400, "Only learners can be mentors");
+		}
 		if (!mentor.isMentor) return failure(res, 400, "User is not an active mentor");
 		if (mentor.level < MENTOR_MIN_LEVEL)
 			return failure(res, 400, "Mentor is not eligible");
