@@ -53,7 +53,7 @@ export function LearnerDashboard() {
       <div className="mb-10">
         <h1 className="text-3xl font-black text-slate-900 mb-2">Welcome back, {user?.name.split(" ")[0]}!</h1>
         <p className="text-slate-500 font-medium tracking-tight">
-          You've earned {totalPoints} points and {badgesCount} badges so far.
+          You've earned {totalPoints} points and {badges.length ?? 0} badges so far.
         </p>
       </div>
 

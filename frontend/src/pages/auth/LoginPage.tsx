@@ -31,9 +31,12 @@ export function LoginPage() {
     <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="text-white inline-flex items-center justify-center w-14 h-14 bg-indigo-600 rounded-2xl mb-4 shadow-lg">
-            <GraduationCap className="w-8 h-8" />
-          </div>
+          <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
+            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-100 group-hover:scale-110 transition-transform duration-500">
+              <GraduationCap className="w-7 h-7 text-white" />
+            </div>
+            <span className="text-2xl font-black text-slate-900 tracking-tight">Learnova</span>
+          </Link>
           <h1 className="text-2xl font-bold text-slate-800">Welcome back</h1>
           <p className="text-slate-500 mt-1 text-sm">Sign in to your Learnova account</p>
         </div>
