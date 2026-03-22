@@ -38,15 +38,6 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link
-            to="/courses"
-            className={cn(
-              "text-sm font-medium transition-colors flex items-center gap-1.5",
-              location.pathname.startsWith("/courses") ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600",
-            )}
-          >
-            <BookOpen className="w-4 h-4" /> Courses
-          </Link>
           {user && user.role !== "admin" && (
             <Link
               to="/dashboard"
@@ -58,6 +49,15 @@ export function Navbar() {
               <LayoutDashboard className="w-4 h-4" /> Dashboard
             </Link>
           )}
+          <Link
+            to="/courses"
+            className={cn(
+              "text-sm font-medium transition-colors flex items-center gap-1.5",
+              location.pathname.startsWith("/courses") ? "text-indigo-600" : "text-slate-600 hover:text-indigo-600",
+            )}
+          >
+            <BookOpen className="w-4 h-4" /> Courses
+          </Link>
           {user?.role === "learner" && (
             <Link
               to="/mentorship"
@@ -150,14 +150,14 @@ export function Navbar() {
 
       {mobileOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 px-4 pb-4 space-y-2">
-          <Link to="/courses" onClick={() => setMobileOpen(false)} className="block py-2 text-sm text-slate-700">
-            Courses
-          </Link>
           {user && user.role !== "admin" && (
             <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="block py-2 text-sm text-slate-700">
               Dashboard
             </Link>
           )}
+          <Link to="/courses" onClick={() => setMobileOpen(false)} className="block py-2 text-sm text-slate-700">
+            Courses
+          </Link>
           {user?.role === "learner" && (
             <Link to="/mentorship" onClick={() => setMobileOpen(false)} className="block py-2 text-sm text-slate-700">
               Mentorship
